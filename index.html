@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Toma Tu Foto</title>      
+</head>
+<body>
+
+  <center><h1>Toma Una Foto</h1></center><br>
+
+  <button id="boton">Capturar</button>
+  <div id="contador"></div>
+  
+    <img src="/photo.jpg">
+  
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    var socket = io.connect();
+    var sessionId = '';
+    var llave = make_key();
+    var contador=10;
+    $( "#boton" ).click(function() {
+      socket.emit('TomarFoto');
+      location.reload();
+      
+    });
+
+    $(document).ready(function(){
+      $('h2').text('*Introduce esta llave en tu dispositivo: '+llave);
+    });
+
+    socket.on('envio', function (data) { 
+      if(data.key == llave){
+        $('h2').hide();
+        $('#sucess').show( "slow" );
+        $('body').css({'background':data.msg});
+      }
+      
+    });
+    
+    socket.on('connect', function(){
+      sessionId = socket.io.engine.id;
+      socket.emit('conexion',{id:sessionId,key:llave});
+      console.log("IdUser:"+sessionId);
+    });
+
+    function make_key(){
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+      for( var i=0; i < 5; i++ )
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      return text;
+    }
+  </script>
+
+
+
+</body>
+</html>
